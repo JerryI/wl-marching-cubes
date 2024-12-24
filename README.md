@@ -44,7 +44,7 @@ Clone this repository to a folder, then load this folder using
 ```mathematica
 PacletDirectoryLoad["path to cloned repo..."];
 
-<<<JerryI`MarchingCubes`
+<<JerryI`MarchingCubes`
 ```
 
 ### Option 2
@@ -55,5 +55,5 @@ PacletRepositories[{
     Github -> "https://github.com/JerryI/wl-marching-cubes" -> "master"
 }]
 
-<<<JerryI`MarchingCubes`
+<<JerryI`MarchingCubes`
 ```
