@@ -18,7 +18,7 @@
 double *vertices;
 double *normals;
 
-mint vertexCount = 0;
+mint triCount = 0;
 
 mint normalBufferSize = 0;
 mint vertexBufferSize = 1024*3;
@@ -144,8 +144,8 @@ for (int z = 1; z < dims[0] - 1; ++z) {
 
 void marchingCubesWithNormals(double *img, mint* dims, double res, double isovalue) {
     mint depth, height, width, ii;
-    mint cnt = 0;
-    vertexCount = 0;
+    mint vertexCnt = 0;
+    triCount = 0;
 
     calcGradients(img, dims, res);
 
@@ -177,8 +177,8 @@ void marchingCubesWithNormals(double *img, mint* dims, double res, double isoval
 
                 // Process triangles
                 for (ii = 0; (triangulationTable[state][ii] != -1); ii += 3) {
-                    if ((cnt +3) >= vertexBufferSize) {
-                      resizeBuffer((cnt +3)*2);
+                    if ((vertexCnt +3) >= vertexBufferSize) {
+                      resizeBuffer((vertexCnt +3)*2);
                     }
 
                     int edgeIndices[3];
@@ -202,59 +202,60 @@ void marchingCubesWithNormals(double *img, mint* dims, double res, double isoval
                         double y2 = y + res * cubeVertices[v2][1];
                         double z2 = z + res * cubeVertices[v2][2];
 
-    // Scalar values at the vertices
-    double val1 = val[v1];
-    double val2 = val[v2];
+                        // Scalar values at the vertices
+                        double val1 = val[v1];
+                        double val2 = val[v2];
 
-    // Interpolation factor
-    double t = (isovalue - val1) / (val2 - val1);
+                        // Interpolation factor
+                        double t = (isovalue - val1) / (val2 - val1);
 
-    // Interpolate position
-    double vertPos[3];
-    vertPos[0] = x1 + t * (x2 - x1);
-    vertPos[1] = y1 + t * (y2 - y1);
-    vertPos[2] = z1 + t * (z2 - z1);
+                        // Interpolate position
+                        double vertPos[3];
+                        vertPos[0] = x1 + t * (x2 - x1);
+                        vertPos[1] = y1 + t * (y2 - y1);
+                        vertPos[2] = z1 + t * (z2 - z1);
 
-    // Interpolate gradients (normals)
-    int ix1 = width + (int)cubeVertices[v1][0];
-    int iy1 = height + (int)cubeVertices[v1][1];
-    int iz1 = depth + (int)cubeVertices[v1][2];
-    int index1 = get3DIndex(iz1, iy1, ix1, dims);
+                        // Interpolate gradients (normals)
+                        int ix1 = width + (int)cubeVertices[v1][0];
+                        int iy1 = height + (int)cubeVertices[v1][1];
+                        int iz1 = depth + (int)cubeVertices[v1][2];
+                        int index1 = get3DIndex(iz1, iy1, ix1, dims);
 
-    int ix2 = width + (int)cubeVertices[v2][0];
-    int iy2 = height + (int)cubeVertices[v2][1];
-    int iz2 = depth + (int)cubeVertices[v2][2];
-    int index2 = get3DIndex(iz2, iy2, ix2, dims);
+                        int ix2 = width + (int)cubeVertices[v2][0];
+                        int iy2 = height + (int)cubeVertices[v2][1];
+                        int iz2 = depth + (int)cubeVertices[v2][2];
+                        int index2 = get3DIndex(iz2, iy2, ix2, dims);
 
-    double grad1[3] = {gradients[index1 * 3 + 0], gradients[index1 * 3 + 1], gradients[index1 * 3 + 2]};
-    double grad2[3] = {gradients[index2 * 3 + 0], gradients[index2 * 3 + 1], gradients[index2 * 3 + 2]};
+                        double grad1[3] = {gradients[index1 * 3 + 0], gradients[index1 * 3 + 1], gradients[index1 * 3 + 2]};
+                        double grad2[3] = {gradients[index2 * 3 + 0], gradients[index2 * 3 + 1], gradients[index2 * 3 + 2]};
 
-    double normal[3];
-    normal[0] = grad1[0] + t * (grad2[0] - grad1[0]);
-    normal[1] = grad1[1] + t * (grad2[1] - grad1[1]);
-    normal[2] = grad1[2] + t * (grad2[2] - grad1[2]);
+                        double normal[3];
+                        normal[0] = grad1[0] + t * (grad2[0] - grad1[0]);
+                        normal[1] = grad1[1] + t * (grad2[1] - grad1[1]);
+                        normal[2] = grad1[2] + t * (grad2[2] - grad1[2]);
 
-    // Normalize the normal vector
-    double length = sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
-    if (length != 0.0) {
-        normal[0] /= length;
-        normal[1] /= length;
-        normal[2] /= length;
-    }
+                        // Normalize the normal vector
+                        double length = sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+                        if (length != 0.0) {
+                            normal[0] /= length;
+                            normal[1] /= length;
+                            normal[2] /= length;
+                        }
 
-    // Store vertex position and normal
-    vertices[cnt * 3 + 0] = vertPos[0];
-    vertices[cnt * 3 + 1] = vertPos[1];
-    vertices[cnt * 3 + 2] = vertPos[2];
+                        // Store vertex position and normal
+                        vertices[vertexCnt * 3 + 0] = vertPos[0];
+                        vertices[vertexCnt * 3 + 1] = vertPos[1];
+                        vertices[vertexCnt * 3 + 2] = vertPos[2];
 
-    normals[cnt * 3 + 0] = normal[0];
-    normals[cnt * 3 + 1] = normal[1];
-    normals[cnt * 3 + 2] = normal[2];
-                        cnt++;
+                        normals[vertexCnt * 3 + 0] = normal[0];
+                        normals[vertexCnt * 3 + 1] = normal[1];
+                        normals[vertexCnt * 3 + 2] = normal[2];
+                        
+                        vertexCnt++;
                         
                     }
                     
-                    vertexCount++;   
+                    triCount++;   
                 }
             }
         }
@@ -264,8 +265,8 @@ void marchingCubesWithNormals(double *img, mint* dims, double res, double isoval
 
 void marchingCubes(double *img, mint* dims, double res, double isovalue) {
     mint depth, height, width, ii;
-    mint cnt = 0;
-    vertexCount = 0;
+    mint vertexCnt = 0;
+    triCount = 0;
 
     for (depth = 0; depth < dims[0] - 1; ++depth) {
         for (height = 0; height < dims[1] - 1; ++height) {
@@ -296,8 +297,8 @@ void marchingCubes(double *img, mint* dims, double res, double isovalue) {
                 // Process triangles
                 for (ii = 0; (triangulationTable[state][ii] != -1); ii += 3) {
                 
-                    if ((cnt +3) >= vertexBufferSize) {
-                      resizeBuffer((cnt +3)*2);
+                    if ((vertexCnt +3) >= vertexBufferSize) {
+                      resizeBuffer((vertexCnt +3)*2);
                     }
 
                     int edgeIndices[3];
@@ -328,14 +329,14 @@ void marchingCubes(double *img, mint* dims, double res, double isovalue) {
                         vertPos[2] = interpolate(isovalue, val[v1], val[v2], z1, z2);
 
                         // Store vertex
-                        vertices[cnt * 3 + 0] = vertPos[0];
-                        vertices[cnt * 3 + 1] = vertPos[1];
-                        vertices[cnt * 3 + 2] = vertPos[2];
-                        cnt++;
+                        vertices[vertexCnt * 3 + 0] = vertPos[0];
+                        vertices[vertexCnt * 3 + 1] = vertPos[1];
+                        vertices[vertexCnt * 3 + 2] = vertPos[2];
+                        vertexCnt++;
                         
                     }
                     
-                    vertexCount++;   
+                    triCount++;   
                 }
             }
         }
@@ -396,14 +397,14 @@ DLLEXPORT int process(WolframLibraryData libData, mint Argc, MArgument *Args, MA
 
  marchingCubes(in_data, in_dims, res, th);
 
- out_dims[0] = vertexCount*3;
+ out_dims[0] = triCount*3;
  out_dims[1] = 3;
 
  /* Create the output array */
  err = libData->MTensor_new(out_type, 2, out_dims, &out);
  out_data = libData->MTensor_getRealData(out);
 
- memcpy(out_data, vertices, vertexCount*3*3*sizeof(double));
+ memcpy(out_data, vertices, triCount*3*3*sizeof(double));
 
  MArgument_setMTensor(Res,out);
  return err;
@@ -425,14 +426,14 @@ DLLEXPORT int getNormals(WolframLibraryData libData, mint Argc, MArgument *Args,
 
  out_type = global_type;
 
- out_dims[0] = vertexCount*3;
+ out_dims[0] = triCount*3;
  out_dims[1] = 3;
 
  /* Create the output array */
  err = libData->MTensor_new(out_type, 2, out_dims, &out);
  out_data = libData->MTensor_getRealData(out);
 
- memcpy(out_data, normals, vertexCount*3*3*sizeof(double));
+ memcpy(out_data, normals, triCount*3*3*sizeof(double));
 
  MArgument_setMTensor(Res,out);
  return err;
@@ -484,14 +485,14 @@ DLLEXPORT int processWithNormals(WolframLibraryData libData, mint Argc, MArgumen
 
  marchingCubesWithNormals(in_data, in_dims, res, th);
 
- out_dims[0] = vertexCount*3;
+ out_dims[0] = triCount*3;
  out_dims[1] = 3;
 
  /* Create the output array */
  err = libData->MTensor_new(out_type, 2, out_dims, &out);
  out_data = libData->MTensor_getRealData(out);
 
- memcpy(out_data, vertices, vertexCount*3*3*sizeof(double));
+ memcpy(out_data, vertices, triCount*3*3*sizeof(double));
 
  MArgument_setMTensor(Res,out);
  return err;
