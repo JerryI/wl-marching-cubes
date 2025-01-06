@@ -1,5 +1,5 @@
 # Realtime Marching cubes for Wolfram Language
-*Implemented in pure C and LibraryLink, aimed to be crossplatform*
+*A mediocre implementation in pure C and LibraryLink, aimed to be crossplatform*
 
 **Alpha version**
 
@@ -34,7 +34,7 @@ the results for 15x15x50 array on Mac Air M1 are following
 ## Platforms supported
 - [x] OSX ARM64
 - [ ] OSX x86
-- [ ] Windows x86
+- [x] Windows x86
 - [ ] GNU/Linux x86
 
 ## Installation
