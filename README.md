@@ -32,10 +32,12 @@ the results for 15x15x50 array on Mac Air M1 are following
 ```
 
 ## Platforms supported
+Current only for Wolfram Kernel > 13.3
+
 - [x] OSX ARM64
 - [ ] OSX x86
 - [x] Windows x86
-- [ ] GNU/Linux x86
+- [x] GNU/Linux x86
 
 ## Installation
 ### Option 1
